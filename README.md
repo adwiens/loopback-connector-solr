@@ -2,9 +2,13 @@
 
 [Solr](http://lucene.apache.org/solr/) connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
-## Notes
+## Tips
 
-Put the following in your model.js: (Disables unimplemented endpoints)
+0. Install in your Loopback node project with "npm i adwiens/loopback-connector-solr"
+
+1. Make a model with the Loopback CLI based on PersistedModel
+
+2. Put the following in your model.js: (Disables unimplemented endpoints)
 
 ```javascript
 module.exports = function(Modelname) {
@@ -13,4 +17,39 @@ module.exports = function(Modelname) {
   Modelname.disableRemoteMethodByName('updateAll', true);
   Modelname.disableRemoteMethodByName('upsertWithWhere', true);
 };
+```
+
+3. Create a datasource in datasources.json:
+
+```javascript
+{
+  "db": {
+    "name": "db",
+    "connector": "memory"
+  },
+  "solr": {
+    "name": "solr",
+    "connector": "solr",
+    "solr": {
+      "host": "localhost",
+      "port": 8983,
+      "core": "your-core-name-goes-here"
+    }
+  }
+}
+```
+
+4. Hook up the datasource to your model in model-config.json:
+
+```javascript
+{
+  "ACL": {
+    "dataSource": "db",
+    "public": false
+  },
+  "hrm": {
+    "dataSource": "solr",
+    "public": true
+  }
+}
 ```

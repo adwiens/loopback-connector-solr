@@ -1,8 +1,8 @@
-#loopback-connector-solr
+# loopback-connector-solr
 
 [Solr](http://lucene.apache.org/solr/) connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
-##Notes
+## Notes
 
 Put the following in your model.js: (Disables unimplemented endpoints)
 

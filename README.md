@@ -4,7 +4,7 @@
 
 ## Tips
 
-0. Install in your Loopback node project with "npm i adwiens/loopback-connector-solr"
+0. Install in your Loopback node project with "npm i adwiens/loopback-connector-solr --save"
 
 1. Make a model with the Loopback CLI based on PersistedModel
 

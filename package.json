@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "description": "Solr connector for loopback",
   "main": "index.js",
-  "repository": "git://github.com/timosaikkonen/loopback-connector-solr",
+  "repository": "git://github.com/adwiens/loopback-connector-solr",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc lib/solr-connector.ts"
   },
-  "author": "Timo Saikkonen",
+  "author": "Timo Saikkonen and Andrew Wiens",
   "license": "MIT",
   "dependencies": {}
 }

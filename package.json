@@ -9,5 +9,7 @@
   },
   "author": "Timo Saikkonen and Andrew Wiens",
   "license": "MIT",
-  "dependencies": {}
+  "dependencies": {
+    "solr-client": "^0.7.0"
+  }
 }

@@ -1,23 +1,46 @@
-/* Put the following in your model.js: (Disables unimplemented endpoints)
+import * as solr from 'solr-client';
 
-module.exports = function(Modelname) {
-  Modelname.disableRemoteMethodByName('createChangeStream', true);
-  Modelname.disableRemoteMethodByName('upsert', true);
-  Modelname.disableRemoteMethodByName('updateAll', true);
-  Modelname.disableRemoteMethodByName('upsertWithWhere', true);
-};
+var client: any;
 
-*/
+interface FindFilter {
+  fields?: any;
+  include?: any;
+  limit?: number;
+  order?: string;
+  skip?: number;
+  where?: any;
+}
 
 class Solr {
   static connector: SolrConnector;
 
-  static find(p1: any, p2: any, p3: Function) {
-    console.log('Solr find');
-    console.log(p1); // filter (get /hrms)
-    console.log(p2); // auth (get /hrms)
-    console.log(p3); // callback (get /hrms)
-    p3();
+  // get /hrms
+  static find(filter: FindFilter, auth: any, callback: Function) {
+    // Construct query:
+    let query: string = '';
+    if (filter.where) {
+      for (var prop in filter.where) {
+        query += '+' + prop + ':' + filter.where[prop];
+      }
+    }
+    else {
+      query = '*:*';
+    }
+    // Run query:
+    client.get('query', {
+      "q": query
+    }, function(err, suc){
+      if(suc){
+        if(suc.response.docs)
+          callback(undefined, suc.response.docs);
+        else
+          callback(undefined, {});
+      }
+      else if(err) {
+        callback(err, undefined);
+      }
+    });
+    
   }
 
   static replaceOrCreate(p1: any, p2: any, p3: Function) {
@@ -108,7 +131,11 @@ export class SolrConnector {
   dataSource: SolrDataSource;
 
   constructor(options: SolrConnectorOptions) {
-    // initialize solr-client here
+    client = (solr as any).createClient(
+      options.solr.host, 
+      options.solr.port, 
+      options.solr.core
+    );
   }
 }
 

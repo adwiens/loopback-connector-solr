@@ -44,7 +44,7 @@ class Query {
     return query;
   }
 
-  // Callback for a Solr find
+  // Callback for find
   static findCb(error: any, success: SolrGetSuccess, callback: Function) {
     if (error) callback(error, undefined);
     else callback(undefined, success.response.docs);
@@ -59,6 +59,12 @@ class Query {
         if(res) callback(undefined, doc);
       });
     }
+  }
+
+  // Callback for exists
+  static existsCb(error: any, success: SolrGetSuccess, callback: Function) {
+    if (error) callback(error, undefined);
+    if (success) callback(undefined, success.response.numFound > 0);
   }
 }
 
@@ -104,13 +110,11 @@ class Solr {
     client.get('query', query, (err, suc) => Query.findCb(err, suc, cb));
   }
 
-  static exists(p1: any, p2: any, p3: Function) {
-    console.log('Solr exists');
-    console.log(p1); // id (head /hrms/{id} && get /hrms/{id}/exists)
-    console.log(p2); // auth (head /hrms/{id} && get /hrms/{id}/exists)
-    console.log(p3); // callback (head /hrms/{id} && get /hrms/{id}/exists)
-    console.log(uuid());
-    p3();
+  // head /hrms/{id}
+  static exists(id: string, auth: object, cb: Function) {
+    let query = {};
+    query = Query.addQueryString({}, query, id);
+    client.get('query', query, (err, suc) => Query.existsCb(err, suc, cb));
   }
 
   static replaceById(p1: any, p2: any, p3: any, p4: Function) {

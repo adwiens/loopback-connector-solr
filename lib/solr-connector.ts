@@ -1,4 +1,5 @@
 import * as solr from 'solr-client';
+import * as uuid from 'uuid/v4';
 
 var client: any;
 
@@ -49,13 +50,13 @@ class Query {
     else callback(undefined, success.response.docs);
   }
   
-  // Callback for a Solr replaceOrCreate
-  static replaceOrCreateCb(error: any, success: object, callback: Function) {
+  // Callback for replaceOrCreate
+  static replaceOrCreateCb(error: any, success: object, callback: Function, doc: object) {
     if (error) callback(error, undefined);
     else {
       client.commit(function(err,res) {
         if(err) callback(err, undefined);
-        if(res) callback(undefined, res);
+        if(res) callback(undefined, doc);
       });
     }
   }
@@ -68,36 +69,39 @@ class Solr {
   // See https://loopback.io/doc/en/lb3/Querying-data.html
   static find(filter: FindFilter, auth: object, cb: Function) {
     let query = {};
-
     query = Query.addQueryString(filter, query);
     query = Query.addStart(filter, query);
     query = Query.addRows(filter, query);
-
     client.get('query', query, (err, suc) => Query.findCb(err, suc, cb));
   }
 
   // put /hrms && post /hrms/replaceOrCreate
   static replaceOrCreate(doc: object, auth: object, cb: Function) {
-    client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb));
+    if (!doc["id"]) {
+      doc["id"] = uuid();
+      let query = {};
+      query = Query.addQueryString({}, query, doc["id"]);
+      client.get('query', query, (err, suc: SolrGetSuccess) => {
+        if (err) 
+          throw new Error("UUID collision check failed")
+        if (suc && suc.response.numFound === 0)
+          client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb, doc));
+        else
+          throw new Error("UUID collision check failed")
+      });
+    }
+    else {
+      client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb, doc));
+    }
   }
 
   // get /hrms/{id}
   static findById(id: string, filter: FindFilter, auth: object, cb: Function) {
     let query = {};
-
     query = Query.addQueryString(filter, query, id);
     query = Query.addStart(filter, query);
     query = Query.addRows(filter, query);
-
     client.get('query', query, (err, suc) => Query.findCb(err, suc, cb));
-  }
-
-  static create(p1: any, p2: any, p3: Function) {
-    console.log('Solr create');
-    console.log(p1); // data (post /hrms)
-    console.log(p2); // auth (post /hrms)
-    console.log(p3); // callback (post /hrms)
-    p3();
   }
 
   static exists(p1: any, p2: any, p3: Function) {
@@ -105,6 +109,7 @@ class Solr {
     console.log(p1); // id (head /hrms/{id} && get /hrms/{id}/exists)
     console.log(p2); // auth (head /hrms/{id} && get /hrms/{id}/exists)
     console.log(p3); // callback (head /hrms/{id} && get /hrms/{id}/exists)
+    console.log(uuid());
     p3();
   }
 
@@ -144,7 +149,8 @@ class Solr {
 
 interface SolrGetSuccess {
   response: {
-    docs: any;
+    numFound: number;
+    docs: Array<object>;
   }
 }
 

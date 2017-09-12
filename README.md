@@ -1,6 +1,6 @@
 # loopback-connector-solr
 
-[Solr](http://lucene.apache.org/solr/) connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
+A [Solr](http://lucene.apache.org/solr/) CRUD connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
 ## Tips
 
@@ -16,6 +16,7 @@ module.exports = function(Modelname) {
   Modelname.disableRemoteMethodByName('upsert', true);
   Modelname.disableRemoteMethodByName('updateAll', true);
   Modelname.disableRemoteMethodByName('upsertWithWhere', true);
+  Modelname.disableRemoteMethodByName('updateAttributes', false);
 };
 ```
 
@@ -47,7 +48,7 @@ module.exports = function(Modelname) {
     "dataSource": "db",
     "public": false
   },
-  "hrm": {
+  "modelname": {
     "dataSource": "solr",
     "public": true
   }

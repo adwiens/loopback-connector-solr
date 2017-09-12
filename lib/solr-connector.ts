@@ -117,13 +117,14 @@ class Solr {
     client.get('query', query, (err, suc) => Query.existsCb(err, suc, cb));
   }
 
-  static replaceById(p1: any, p2: any, p3: any, p4: Function) {
+  // put /hrms/{id} && post /hrms/{id}/replace
+  static replaceById(id: string, data: object, auth: object, cb: Function) {
     console.log('Solr replaceById');
-    console.log(p1); // id (put /hrms/{id} && post /hrms/{id}/replace)
-    console.log(p2); // data (put /hrms/{id} && post /hrms/{id}/replace)
-    console.log(p3); // auth (put /hrms/{id} && post /hrms/{id}/replace)
-    console.log(p4); // callback (put /hrms/{id} && post /hrms/{id}/replace)
-    p4();
+    console.log(id); // id ()
+    console.log(data); // data (put /hrms/{id} && post /hrms/{id}/replace)
+    console.log(auth); // auth (put /hrms/{id} && post /hrms/{id}/replace)
+    console.log(cb); // callback (put /hrms/{id} && post /hrms/{id}/replace)
+    cb();
   }
 
   static deleteById(p1: any, p2: any, p3: Function) {

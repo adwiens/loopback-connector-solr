@@ -3,52 +3,89 @@ import * as solr from 'solr-client';
 var client: any;
 
 interface FindFilter {
-  fields?: any;
-  include?: any;
-  limit?: number;
-  order?: string;
-  skip?: number;
-  where?: any;
+  fields?: any;     /* TODO */
+  include?: any;    /* TODO */
+  limit?: number;   /* addRows */
+  order?: string;   /* TODO */
+  skip?: number;    /* addStart */
+  where?: any;      /* addQueryString */
+}
+
+class Query {
+  // Adds query string to the query object based on filter.where
+  // See http://yonik.com/solr/query-syntax/
+  static addQueryString(filter: FindFilter, query: object): object {
+    let queryString = '';
+    if (filter && filter.where) {
+      for (var prop in filter.where) {
+        queryString += '+' + prop + ':' + filter.where[prop] + ' ';
+      }
+    }
+    else {
+      queryString = '*:*';
+    }
+    query["q"] = queryString;
+    return query;
+  }
+
+  // Adds start field to the query object based on filter.skip
+  static addStart(filter: FindFilter, query: object): object {
+    if (filter && filter.skip) {
+      query["start"] = filter.skip + '';
+    }
+    return query;
+  }
+
+  // Adds rows field to the query object based on filter.limit
+  static addRows(filter: FindFilter, query: object): object {
+    if (filter && filter.limit) {
+      query["rows"] = filter.limit + '';
+    }
+    return query;
+  }
+
+  // Callback for a Solr find
+  static findCb(error: any, success: SolrGetSuccess, callback: Function) {
+    if (error) {
+      callback(error, undefined);
+    }
+    else {
+      callback(undefined, success.response.docs);
+    }
+  }
+  
+  // Callback for a Solr replaceOrCreate
+  static replaceOrCreateCb(error: any, success: object, callback: Function) {
+    if (error) {
+      callback(error, undefined);
+    }
+    else {
+      client.commit(function(err,res) {
+        if(err) callback(err, undefined);
+        if(res) callback(undefined, res);
+      });
+    }
+  }
 }
 
 class Solr {
   static connector: SolrConnector;
 
   // get /hrms
-  static find(filter: FindFilter, auth: any, callback: Function) {
-    // Construct query:
-    let query: string = '';
-    if (filter.where) {
-      for (var prop in filter.where) {
-        query += '+' + prop + ':' + filter.where[prop];
-      }
-    }
-    else {
-      query = '*:*';
-    }
-    // Run query:
-    client.get('query', {
-      "q": query
-    }, function(err, suc){
-      if(suc){
-        if(suc.response.docs)
-          callback(undefined, suc.response.docs);
-        else
-          callback(undefined, {});
-      }
-      else if(err) {
-        callback(err, undefined);
-      }
-    });
-    
+  // See https://loopback.io/doc/en/lb3/Querying-data.html
+  static find(filter: FindFilter, auth: object, cb: Function) {
+    let query = {};
+
+    query = Query.addQueryString(filter, query);
+    query = Query.addStart(filter, query);
+    query = Query.addRows(filter, query);
+
+    client.get('query', query, (err, suc) => Query.findCb(err, suc, cb));
   }
 
-  static replaceOrCreate(p1: any, p2: any, p3: Function) {
-    console.log('Solr replaceOrCreate');
-    console.log(p1); // data (put /hrms && post /hrms/replaceOrCreate)
-    console.log(p2); // auth (put /hrms && post /hrms/replaceOrCreate)
-    console.log(p3); // callback (put /hrms && post /hrms/replaceOrCreate)
-    p3();
+  // put /hrms && post /hrms/replaceOrCreate
+  static replaceOrCreate(doc: object, auth: object, cb: Function) {
+    client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb));
   }
 
   static findById(p1: any, p2: any, p3: any, p4: Function) {
@@ -107,6 +144,12 @@ class Solr {
     console.log(p2); // auth (get /hrms/findOne)
     console.log(p3); // callback (get /hrms/findOne)
     p3();
+  }
+}
+
+interface SolrGetSuccess {
+  response: {
+    docs: any;
   }
 }
 

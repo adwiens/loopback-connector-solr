@@ -14,15 +14,16 @@ interface FindFilter {
 class Query {
   // Adds query string to the query object based on filter.where
   // See http://yonik.com/solr/query-syntax/
-  static addQueryString(filter: FindFilter, query: object): object {
+  static addQueryString(filter: FindFilter, query: object, id?: string): object {
     let queryString = '';
     if (filter && filter.where) {
       for (var prop in filter.where) {
         queryString += '+' + prop + ':' + filter.where[prop] + ' ';
       }
+      if (id) queryString += '+id:' + id;
     }
     else {
-      queryString = '*:*';
+      queryString = id ? ('+id:' + id) : '*:*';
     }
     query["q"] = queryString;
     return query;
@@ -30,35 +31,27 @@ class Query {
 
   // Adds start field to the query object based on filter.skip
   static addStart(filter: FindFilter, query: object): object {
-    if (filter && filter.skip) {
+    if (filter && filter.skip)
       query["start"] = filter.skip + '';
-    }
     return query;
   }
 
   // Adds rows field to the query object based on filter.limit
   static addRows(filter: FindFilter, query: object): object {
-    if (filter && filter.limit) {
+    if (filter && filter.limit)
       query["rows"] = filter.limit + '';
-    }
     return query;
   }
 
   // Callback for a Solr find
   static findCb(error: any, success: SolrGetSuccess, callback: Function) {
-    if (error) {
-      callback(error, undefined);
-    }
-    else {
-      callback(undefined, success.response.docs);
-    }
+    if (error) callback(error, undefined);
+    else callback(undefined, success.response.docs);
   }
   
   // Callback for a Solr replaceOrCreate
   static replaceOrCreateCb(error: any, success: object, callback: Function) {
-    if (error) {
-      callback(error, undefined);
-    }
+    if (error) callback(error, undefined);
     else {
       client.commit(function(err,res) {
         if(err) callback(err, undefined);
@@ -88,13 +81,15 @@ class Solr {
     client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb));
   }
 
-  static findById(p1: any, p2: any, p3: any, p4: Function) {
-    console.log('Solr findById');
-    console.log(p1); // id (patch /hrms/{id} && get /hrms/{id})
-    console.log(p2); // ? empty (patch /hrms/{id}) || filter (get /hrms/{id})
-    console.log(p3); // auth (patch /hrms/{id} && get /hrms/{id})
-    console.log(p4); // callback (patch /hrms/{id} && get /hrms/{id})
-    p4();
+  // get /hrms/{id}
+  static findById(id: string, filter: FindFilter, auth: object, cb: Function) {
+    let query = {};
+
+    query = Query.addQueryString(filter, query, id);
+    query = Query.addStart(filter, query);
+    query = Query.addRows(filter, query);
+
+    client.get('query', query, (err, suc) => Query.findCb(err, suc, cb));
   }
 
   static create(p1: any, p2: any, p3: Function) {

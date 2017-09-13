@@ -50,8 +50,8 @@ class Query {
     else callback(undefined, success.response.docs);
   }
   
-  // Callback for replaceOrCreate
-  static replaceOrCreateCb(error: any, success: object, callback: Function, doc: object) {
+  // Callback for replaceOrCreate and replaceById
+  static replaceCb(error: any, success: object, callback: Function, doc: object) {
     if (error) callback(error, undefined);
     else {
       client.commit(function(err,res) {
@@ -91,13 +91,13 @@ class Solr {
         if (err) 
           throw new Error("UUID collision check failed")
         if (suc && suc.response.numFound === 0)
-          client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb, doc));
+          client.add([doc], (err, suc) => Query.replaceCb(err, suc, cb, doc));
         else
           throw new Error("UUID collision check failed")
       });
     }
     else {
-      client.add([doc], (err, suc) => Query.replaceOrCreateCb(err, suc, cb, doc));
+      client.add([doc], (err, suc) => Query.replaceCb(err, suc, cb, doc));
     }
   }
 
@@ -118,13 +118,32 @@ class Solr {
   }
 
   // put /hrms/{id} && post /hrms/{id}/replace
-  static replaceById(id: string, data: object, auth: object, cb: Function) {
-    console.log('Solr replaceById');
-    console.log(id); // id ()
-    console.log(data); // data (put /hrms/{id} && post /hrms/{id}/replace)
-    console.log(auth); // auth (put /hrms/{id} && post /hrms/{id}/replace)
-    console.log(cb); // callback (put /hrms/{id} && post /hrms/{id}/replace)
-    cb();
+  static replaceById(id: string, newDoc: object, auth: object, cb: Function) {
+    let query = {};
+    query = Query.addQueryString({}, query, id);
+    client.get('query', query, (err, suc: SolrGetSuccess) => {
+      if (err) cb(err, undefined);
+      if (suc) {
+        if (suc.response.numFound == 1) { /* id exists */
+          let origDoc = suc.response.docs[0];
+          for (var prop in origDoc) { /* merge fields */
+            if (prop[0] == '_') continue; /* skip Solr's built-in fields */
+            if (newDoc[prop] === undefined) newDoc[prop] = origDoc[prop];
+          }
+          client.add([newDoc], (err, suc) => Query.replaceCb(err, suc, cb, newDoc));
+        }
+        else if (suc.response.numFound > 1) cb({ /* id collision */
+          name: 'Found multiple documents with the same ID', 
+          status: '', 
+          message: 'More than one document shares this ID. This should not be possible.'
+        });
+        else cb({ /* id does not exist */
+          name: 'ID does not exist', 
+          status: '', 
+          message: 'Cannot replace by ID because a document with the given ID does not exist in the database.'
+        });
+      }
+    });
   }
 
   static deleteById(p1: any, p2: any, p3: Function) {

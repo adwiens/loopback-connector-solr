@@ -146,12 +146,17 @@ class Solr {
     });
   }
 
-  static deleteById(p1: any, p2: any, p3: Function) {
-    console.log('Solr deleteById');
-    console.log(p1); // id (delete /hrms/{id})
-    console.log(p2); // auth (delete /hrms/{id})
-    console.log(p3); // callback (delete /hrms/{id})
-    p3();
+  // delete /hrms/{id}
+  static deleteById(id: string, auth: object, cb: Function) {
+    client.deleteByID(id, function(err, obj) {
+      if (err) cb({
+        name: 'Could not delete by ID',
+        status: '',
+        message: JSON.stringify(err)
+      });
+      else cb(undefined);
+    });
+    // TODO: commit
   }
 
   static count(p1: any, p2: any, p3: Function) {

@@ -2,6 +2,12 @@
 
 A [Solr](http://lucene.apache.org/solr/) CRUD connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
+## To build
+
+A build script transpiles the TypeScript into JS using tsc. To run it, use the command:
+
+    npm run-script build
+
 ## Tips
 
 0. Install in your Loopback node project with "npm i adwiens/loopback-connector-solr --save"

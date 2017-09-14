@@ -1,5 +1,5 @@
-import * as solr from 'solr-client';
-import * as uuid from 'uuid/v4';
+import solr = require('solr-client');
+import uuid = require('uuid/v4');
 
 var client: any;
 
@@ -13,9 +13,9 @@ interface FindFilter {
 }
 
 class Query {
-  // Adds query string to the query object based on filter.where
+  // Adds query string to the query Object based on filter.where
   // See http://yonik.com/solr/query-syntax/
-  static addQueryString(filter: FindFilter, query: object, id?: string): object {
+  static addQueryString(filter: FindFilter, query: Object, id?: string): Object {
     let queryString = '';
     if (filter && filter.where) {
       for (var prop in filter.where) {
@@ -30,15 +30,15 @@ class Query {
     return query;
   }
 
-  // Adds start field to the query object based on filter.skip
-  static addStart(filter: FindFilter, query: object): object {
+  // Adds start field to the query Object based on filter.skip
+  static addStart(filter: FindFilter, query: Object): Object {
     if (filter && filter.skip)
       query["start"] = filter.skip + '';
     return query;
   }
 
-  // Adds rows field to the query object based on filter.limit
-  static addRows(filter: FindFilter, query: object): object {
+  // Adds rows field to the query Object based on filter.limit
+  static addRows(filter: FindFilter, query: Object): Object {
     if (filter && filter.limit)
       query["rows"] = filter.limit + '';
     return query;
@@ -51,7 +51,7 @@ class Query {
   }
   
   // Callback for replaceOrCreate and replaceById
-  static replaceCb(error: any, success: object, callback: Function, doc: object) {
+  static replaceCb(error: any, success: Object, callback: Function, doc: Object) {
     if (error) callback(error, undefined);
     else {
       client.commit(function(err,res) {
@@ -73,7 +73,7 @@ class Solr {
 
   // get /hrms
   // See https://loopback.io/doc/en/lb3/Querying-data.html
-  static find(filter: FindFilter, auth: object, cb: Function) {
+  static find(filter: FindFilter, auth: Object, cb: Function) {
     let query = {};
     query = Query.addQueryString(filter, query);
     query = Query.addStart(filter, query);
@@ -82,7 +82,7 @@ class Solr {
   }
 
   // put /hrms && post /hrms/replaceOrCreate
-  static replaceOrCreate(doc: object, auth: object, cb: Function) {
+  static replaceOrCreate(doc: Object, auth: Object, cb: Function) {
     if (!doc["id"]) {
       doc["id"] = uuid();
       let query = {};
@@ -102,7 +102,7 @@ class Solr {
   }
 
   // get /hrms/{id}
-  static findById(id: string, filter: FindFilter, auth: object, cb: Function) {
+  static findById(id: string, filter: FindFilter, auth: Object, cb: Function) {
     let query = {};
     query = Query.addQueryString(filter, query, id);
     query = Query.addStart(filter, query);
@@ -111,14 +111,14 @@ class Solr {
   }
 
   // head /hrms/{id}
-  static exists(id: string, auth: object, cb: Function) {
+  static exists(id: string, auth: Object, cb: Function) {
     let query = {};
     query = Query.addQueryString({}, query, id);
     client.get('query', query, (err, suc) => Query.existsCb(err, suc, cb));
   }
 
   // put /hrms/{id} && post /hrms/{id}/replace
-  static replaceById(id: string, newDoc: object, auth: object, cb: Function) {
+  static replaceById(id: string, newDoc: Object, auth: Object, cb: Function) {
     let query = {};
     query = Query.addQueryString({}, query, id);
     client.get('query', query, (err, suc: SolrGetSuccess) => {
@@ -147,7 +147,7 @@ class Solr {
   }
 
   // delete /hrms/{id}
-  static deleteById(id: string, auth: object, cb: Function) {
+  static deleteById(id: string, auth: Object, cb: Function) {
     client.deleteByID(id, function(err, obj) {
       if (err) cb({
         name: 'Could not delete by ID',
@@ -179,7 +179,7 @@ class Solr {
 interface SolrGetSuccess {
   response: {
     numFound: number;
-    docs: Array<object>;
+    docs: Array<Object>;
   }
 }
 
@@ -204,11 +204,7 @@ export class SolrConnector {
   dataSource: SolrDataSource;
 
   constructor(options: SolrConnectorOptions) {
-    client = (solr as any).createClient(
-      options.solr.host, 
-      options.solr.port, 
-      options.solr.core
-    );
+    client = solr.createClient(options.solr.host, options.solr.port, options.solr.core);
   }
 }
 

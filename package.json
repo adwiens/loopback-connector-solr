@@ -11,8 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.4",
-    "solr-client": "^0.7.0",
-    "uuid": "^3.1.0"
+    "solr-client": "^0.7.0"
   },
   "devDependencies": {
     "typescript": "^2.5.2"

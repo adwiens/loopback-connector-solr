@@ -2,6 +2,18 @@
 
 A non-mutable CRUD connector for [Solr](http://lucene.apache.org/solr/) in TypeScript for [Loopback.io](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
+## Supported endpoints
+
+* GET /api
+* GET /api/{id}
+* HEAD /api/{id}
+* GET /api/{id}/exists
+* GET /api/findOne
+
+## Supported filters
+
+All [loopback filters](https://loopback.io/doc/en/lb2/Querying-data.html) are supported except [include](https://loopback.io/doc/en/lb2/Include-filter.html). Currently, only equivalence is supported in [where](https://loopback.io/doc/en/lb2/Where-filter.html)
+
 ## To build
 
 A build script transpiles the TypeScript into JS using tsc. To run it, use the command:

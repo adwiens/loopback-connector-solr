@@ -1,6 +1,6 @@
 # loopback-connector-solr
 
-A [Solr](http://lucene.apache.org/solr/) CRUD connector in TypeScript for [loopback](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
+A non-mutable CRUD connector for [Solr](http://lucene.apache.org/solr/) in TypeScript for [Loopback.io](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
 ## To build
 
@@ -10,19 +10,26 @@ A build script transpiles the TypeScript into JS using tsc. To run it, use the c
 
 ## Tips
 
-0. Install in your Loopback node project with "npm i adwiens/loopback-connector-solr --save"
+0. Install in your Loopback node project with
+
+    npm i adwiens/loopback-connector-solr --save
 
 1. Make a model with the Loopback CLI based on PersistedModel
 
-2. Put the following in your model.js: (Disables unimplemented endpoints)
+2. Put the following in your model.js: (Disables unimplemented and mutable endpoints)
 
 ```javascript
 module.exports = function(Modelname) {
-  Modelname.disableRemoteMethodByName('createChangeStream', true);
-  Modelname.disableRemoteMethodByName('upsert', true);
-  Modelname.disableRemoteMethodByName('updateAll', true);
-  Modelname.disableRemoteMethodByName('upsertWithWhere', true);
-  Modelname.disableRemoteMethodByName('updateAttributes', false);
+  Modelname.disableRemoteMethodByName('createChangeStream');
+  Modelname.disableRemoteMethodByName('upsert');
+  Modelname.disableRemoteMethodByName('updateAll');
+  Modelname.disableRemoteMethodByName('upsertWithWhere');
+  Modelname.disableRemoteMethodByName('create');
+  Modelname.disableRemoteMethodByName('replaceOrCreate');
+  Modelname.disableRemoteMethodByName('replaceById');
+  Modelname.disableRemoteMethodByName('deleteById');
+  Modelname.disableRemoteMethodByName('count');
+  Modelname.disableRemoteMethod('updateAttributes', false); // updateAttributes is not static - have to use this deprecated function
 };
 ```
 

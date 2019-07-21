@@ -1,6 +1,6 @@
 # loopback-connector-solr
 
-A non-mutable CRUD connector for [Solr](http://lucene.apache.org/solr/) in TypeScript for [Loopback.io](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
+A non-mutable CRUD connector for [Solr](http://lucene.apache.org/solr/) in TypeScript for [LoopBack.io](http://github.com/strongloop/loopback) forked from [Timo](https://github.com/timosaikkonen/loopback-connector-solr)
 
 ## Supported endpoints
 
@@ -16,11 +16,11 @@ All [loopback filters](https://loopback.io/doc/en/lb2/Querying-data.html) are su
 
 ## Quick start
 
-0. Install in your Loopback node project with
+0. Install in your LoopBack node project with
 
         npm i adwiens/loopback-connector-solr --save
 
-1. Make a model with the Loopback CLI based on PersistedModel
+1. Make a model with the LoopBack CLI based on PersistedModel
 
 2. Put the following in your model.js: (Disables unimplemented and mutable endpoints)
 
